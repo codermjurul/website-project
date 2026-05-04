@@ -1,30 +1,20 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { mockCars, Car } from '../data/cars';
+import { Car } from '../data/cars';
+import { useCars } from '../hooks/useCars';
 import { Filter, SlidersHorizontal, Plus } from 'lucide-react';
 
+// Browse component: Renders a browseable list of all cars,
+// including real-time text search, brand/category filtering, and sorting functionality.
 export function Browse() {
+  const { cars, loading, seedDatabase } = useCars();
+  const allCars = cars;
+  
   // --- State for Filtering and Sorting ---
   const [searchTerm, setSearchTerm] = useState('');
   const [filterBrand, setFilterBrand] = useState('All');
   const [filterImport, setFilterImport] = useState('All');
   const [sortBy, setSortBy] = useState('price-asc');
-
-  // Load user submitted listings from localStorage to merge with mock data
-  const [allCars, setAllCars] = useState<Car[]>(mockCars);
-
-  useEffect(() => {
-    const savedListings = localStorage.getItem('userListings');
-    if (savedListings) {
-      try {
-        const parsedListings: Car[] = JSON.parse(savedListings);
-        // Merge the mock cars with the user-submitted cars so they appear alongside each other
-        setAllCars([...mockCars, ...parsedListings]);
-      } catch (e) {
-        console.error("Failed to parse user listings", e);
-      }
-    }
-  }, []);
 
   // We derive the list of unique brands for our filter dropdown
   const brands = useMemo(() => ['All', ...Array.from(new Set(allCars.map(car => car.brand)))], [allCars]);
@@ -144,19 +134,35 @@ export function Browse() {
         </div>
 
         {/* Grid */}
-        {filteredCars.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
+            <p className="text-gray-500">Loading cars...</p>
+          </div>
+        ) : filteredCars.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
             <p className="text-gray-500">No cars found matching your criteria.</p>
-            <button 
-              onClick={() => {
-                setSearchTerm('');
-                setFilterBrand('All');
-                setFilterImport('All');
-              }}
-              className="mt-4 text-blue-600 font-medium text-sm hover:underline"
-            >
-              Clear filters
-            </button>
+            <div className="mt-6 flex justify-center gap-4">
+              <button 
+                onClick={() => {
+                  setSearchTerm('');
+                  setFilterBrand('All');
+                  setFilterImport('All');
+                }}
+                className="text-blue-600 font-medium text-sm hover:underline"
+              >
+                Clear filters
+              </button>
+              {cars.length === 0 && (
+                <button 
+                  onClick={async () => {
+                    await seedDatabase();
+                  }}
+                  className="bg-green-600 hover:bg-green-700 active:scale-95 text-white font-medium py-2 px-4 rounded transition-all text-sm shadow-sm"
+                >
+                  Load Demo Data
+                </button>
+              )}
+            </div>
           </div>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -171,7 +177,7 @@ export function Browse() {
                     src={car.image} 
                     alt={`${car.brand} ${car.model}`} 
                     className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                    onError={(e) => { e.currentTarget.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'; }} // onError fallback ensures a placeholder shows if the image URL ever fails to load
+                    onError={(e) => { (e.target as HTMLImageElement).src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'; }} // Fallback image shown if the main image URL fails to load
                   />
                   <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md text-xs font-semibold text-gray-800">
                     {car.year}

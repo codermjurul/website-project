@@ -1,11 +1,18 @@
 import React, { useState } from 'react';
-import { CheckCircle2, CarFront, UploadCloud, X } from 'lucide-react';
+import { CheckCircle2, CarFront, UploadCloud, X, AlertCircle } from 'lucide-react';
 import { Car } from '../data/cars';
+import { useAuth } from '../contexts/AuthContext';
+import { useCars } from '../hooks/useCars';
 
+// SellCar component: Provides a form for users to list their own car for sale.
+// It uses Firebase to persist these user-submitted listings.
 export function SellCar() {
+  const { user, signIn } = useAuth();
+  const { addCar } = useCars();
   const [success, setSuccess] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   // Controlled form state to manage user inputs
   const [formData, setFormData] = useState({
@@ -66,8 +73,12 @@ export function SellCar() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      setError("You must be signed in to list a car.");
+      return;
+    }
     
     // Create the new car listing matching the Car interface
     const newCar: Car = {
@@ -86,40 +97,48 @@ export function SellCar() {
       reviews: [] // Initialize with no reviews
     };
 
-    // Use localStorage to simulate a database.
-    // This allows the listing to persist across page reloads and be accessed by the Browse page
-    const existingListings = localStorage.getItem('userListings');
-    const parsedListings: Car[] = existingListings ? JSON.parse(existingListings) : [];
-    
-    // Add the new car to the existing listings
-    const updatedListings = [...parsedListings, newCar];
-    
-    // Save updated listings array back to localStorage as a JSON string
-    localStorage.setItem('userListings', JSON.stringify(updatedListings));
+    try {
+      await addCar(newCar);
+      setSuccess(true);
+      setError(null);
+      
+      // Reset form fields
+      setFormData({
+        brand: '',
+        model: '',
+        year: new Date().getFullYear(),
+        price: '',
+        importation: 'Local',
+        condition: 'Good',
+        fuelType: 'Petrol',
+        transmission: 'Automatic',
+        mileage: '',
+        description: '',
+        sellerName: '',
+        sellerEmail: ''
+      });
+      setImagePreview(null);
 
-    // Show success message
-    setSuccess(true);
-    
-    // Reset form fields
-    setFormData({
-      brand: '',
-      model: '',
-      year: new Date().getFullYear(),
-      price: '',
-      importation: 'Local',
-      condition: 'Good',
-      fuelType: 'Petrol',
-      transmission: 'Automatic',
-      mileage: '',
-      description: '',
-      sellerName: '',
-      sellerEmail: ''
-    });
-    setImagePreview(null);
-
-    // Hide success message after 3 seconds
-    setTimeout(() => setSuccess(false), 3000);
+      // Hide success message after 3 seconds
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err: any) {
+      console.error(err);
+      setError("There was a problem listing your car. Make sure you are authenticated and have filled all fields correctly.");
+    }
   };
+
+  if (!user) {
+    return (
+      <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in zoom-in duration-300 flex flex-col items-center justify-center py-20">
+        <UploadCloud className="text-gray-300 w-24 h-24 mb-4" />
+        <h2 className="text-2xl font-bold text-gray-800">Sign in to sell your car</h2>
+        <p className="text-gray-500 max-w-md text-center">To ensure the quality of our listings, you must be signed in to post a vehicle on AutoTrade.</p>
+        <button onClick={signIn} className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-md mt-4">
+          Sign in with Google
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in zoom-in duration-300">

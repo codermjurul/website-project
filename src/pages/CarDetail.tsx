@@ -1,15 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { mockCars, Review } from '../data/cars';
+import { Review } from '../data/cars';
+import { useCars } from '../hooks/useCars';
 import { useCompare } from '../hooks/useCompare';
+import { useAuth } from '../contexts/AuthContext';
 import { ArrowLeft, CheckCircle2, AlertCircle, Plus, Minus, MessageSquare, Star, ArrowRightLeft } from 'lucide-react';
 
+// CarDetail component: Displays full details, specs, and a user review section for a single car.
+// Also provides functionality to leave a review and make a simulated counter-offer.
 export function CarDetail() {
   const { id } = useParams<{ id: string }>();
   const { compareIds, toggleCompare } = useCompare();
+  const { cars, loading, addReview } = useCars();
+  
+  const { user, signIn } = useAuth();
   
   // Find the car based on the URL parameter ID
-  const car = mockCars.find(c => c.id === id);
+  const car = cars.find(c => c.id === id);
 
   // Modal State for 'Make an Offer'
   const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
@@ -17,10 +24,6 @@ export function CarDetail() {
   const [offerSent, setOfferSent] = useState(false);
 
   // --- Review Form State ---
-  // useState holds the merged list of mock reviews + user-submitted local reviews
-  const [allReviews, setAllReviews] = useState<Review[]>([]);
-  
-  // useState controls the controlled form fields for the review
   const [reviewName, setReviewName] = useState('');
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
@@ -28,51 +31,123 @@ export function CarDetail() {
   // useState controls the temporary success message visibility
   const [reviewSuccess, setReviewSuccess] = useState(false);
 
-  // Use useEffect to load saved reviews from localStorage on component mount or when 'car' changes
+  // Cars are coming from firestore now, so we no longer need localStorage for reviews
+  const allReviews = car?.reviews || [];
+
+  // --- Price Fairness Logic ---
+  // Start with a base price depending on the car's condition
+  let basePrice = 0;
+  if (car?.condition === 'Excellent') basePrice = 3500000;
+  else if (car?.condition === 'Good') basePrice = 2500000;
+  else if (car?.condition === 'Fair') basePrice = 1500000;
+  else basePrice = 2000000; // Default fallback
+
+  // Adjust the base price downward by 50000 BDT for every year older the car is compared to 2024
+  const yearDiff = 2024 - (car?.year || 2024);
+  const yearAdjustment = yearDiff > 0 ? yearDiff * 50000 : 0;
+
+  // Adjust the base price downward by 1 BDT for every km of mileage above 20000 km
+  const mileageAdjustment = (car?.mileage || 0) > 20000 ? ((car?.mileage || 0) - 20000) * 1 : 0;
+
+  // The result of this calculation is the "fair market price"
+  const fairMarketPrice = basePrice - yearAdjustment - mileageAdjustment;
+
+  // Compare the car's actual price to the fair market price
+  let priceLabel = 'Fair Price';
+  let priceColorClass = 'text-yellow-600 bg-yellow-50 border-yellow-200';
+  
+  // If the car's price is more than 10% below fair market price → label is "Good Deal" with green color
+  if ((car?.price || 0) < fairMarketPrice * 0.9) {
+    priceLabel = 'Good Deal';
+    priceColorClass = 'text-green-600 bg-green-50 border-green-200';
+  } 
+  // If the car's price is more than 10% above fair market price → label is "Overpriced" with red color
+  else if ((car?.price || 0) > fairMarketPrice * 1.1) {
+    priceLabel = 'Overpriced';
+    priceColorClass = 'text-red-600 bg-red-50 border-red-200';
+  }
+  // Otherwise, it remains "Fair Price" with yellow color
+
+  // --- Loan & EMI Calculator State ---
+  // The down payment input value (defaults to 20% of the car price)
+  const [downPayment, setDownPayment] = useState<number>(0);
+  
+  // Initialize down payment when car loads
   useEffect(() => {
     if (car) {
-      // localStorage is used to persist data across page refreshes.
-      // We retrieve any saved reviews for this specific car using its ID as the key.
-      const savedReviews = localStorage.getItem(`reviews_${car.id}`);
-      const parsedSavedReviews: Review[] = savedReviews ? JSON.parse(savedReviews) : [];
-      
-      // We merge the static mock data reviews with the locally saved reviews so both show together.
-      setAllReviews([...car.reviews, ...parsedSavedReviews]);
+      setDownPayment(Math.round(car.price * 0.2));
     }
   }, [car]);
 
-  const handleReviewSubmit = (e: React.FormEvent) => {
+  // The loan term in months (defaults to 36)
+  const [loanTerm, setLoanTerm] = useState<number>(36);
+  // The annual interest rate percentage (defaults to 9)
+  const [interestRate, setInterestRate] = useState<number>(9);
+
+  // --- Loan Calculations ---
+  // Loan Amount = Car Price minus Down Payment (cannot be negative)
+  const loanAmount = Math.max(0, (car?.price || 0) - downPayment);
+  // Monthly interest rate calculation: (annual rate / 12) / 100
+  const monthlyInterestRate = interestRate / 12 / 100;
+  
+  // Calculating Monthly EMI using the formula: EMI = [P x R x (1+R)^N] / [(1+R)^N - 1]
+  // where P is loan amount, R is monthly interest rate, N is number of months
+  let monthlyEmi = 0;
+  if (monthlyInterestRate > 0) {
+    const emiNumerator = loanAmount * monthlyInterestRate * Math.pow(1 + monthlyInterestRate, loanTerm);
+    const emiDenominator = Math.pow(1 + monthlyInterestRate, loanTerm) - 1;
+    monthlyEmi = emiDenominator > 0 ? (emiNumerator / emiDenominator) : 0;
+  } else {
+    // If interest rate is 0, EMI is simply loan amount divided by loan term
+    monthlyEmi = loanTerm > 0 ? loanAmount / loanTerm : 0;
+  }
+
+  // Total Payment = Monthly EMI multiplied by number of months
+  const totalPayment = monthlyEmi * loanTerm;
+  // Total Interest = Total Payment minus Loan Amount
+  const totalInterest = Math.max(0, totalPayment - loanAmount);
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!car) return;
+    if (!user) {
+      signIn();
+      return;
+    }
 
     // Create the new review object
     const newReview: Review = {
       id: `local_${Date.now()}`,
-      userName: reviewName,
+      userName: reviewName || user.displayName || 'Anonymous',
       rating: reviewRating,
       comment: reviewComment,
       date: new Date().toISOString().split('T')[0]
     };
 
-    // Update the local state so the review appears instantly
-    const updatedReviews = [...allReviews, newReview];
-    setAllReviews(updatedReviews);
-
-    // Save only the newly added reviews to localStorage (not the mock data)
-    const savedReviews = localStorage.getItem(`reviews_${car.id}`);
-    const parsedSavedReviews: Review[] = savedReviews ? JSON.parse(savedReviews) : [];
-    const newStoredList = [...parsedSavedReviews, newReview];
-    localStorage.setItem(`reviews_${car.id}`, JSON.stringify(newStoredList));
-
-    // Clear form fields
-    setReviewName('');
-    setReviewRating(5);
-    setReviewComment('');
-    
-    // Show success message
-    setReviewSuccess(true);
-    setTimeout(() => setReviewSuccess(false), 3000);
+    try {
+      await addReview(car.id, newReview);
+      
+      // Clear form fields
+      setReviewName('');
+      setReviewRating(5);
+      setReviewComment('');
+      
+      // Show success message
+      setReviewSuccess(true);
+      setTimeout(() => setReviewSuccess(false), 3000);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to add review. Make sure you are signed in.');
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="text-center py-20">
+        <p className="text-gray-500">Loading car details...</p>
+      </div>
+    );
+  }
 
   if (!car) {
     return (
@@ -111,7 +186,7 @@ export function CarDetail() {
               src={car.image} 
               alt={`${car.brand} ${car.model}`} 
               className="w-full h-full object-cover" 
-              onError={(e) => { e.currentTarget.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'; }} // onError fallback ensures a placeholder shows if the image URL ever fails to load
+              onError={(e) => { (e.target as HTMLImageElement).src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'; }} // Fallback image shown if the main image URL fails to load
             />
           </div>
 
@@ -147,7 +222,15 @@ export function CarDetail() {
               <h1 className="text-3xl font-extrabold text-gray-900">{car.brand} {car.model}</h1>
               <span className="text-3xl font-bold text-blue-600">৳{car.price.toLocaleString()}</span> {/* Currency set to BDT (Bangladeshi Taka) for local market */}
             </div>
-            <p className="text-sm text-gray-500 font-medium mb-6">Year: {car.year}</p>
+            <p className="text-sm text-gray-500 font-medium mb-4">Year: {car.year}</p>
+
+            {/* Price Fairness Indicator */}
+            <div className="flex items-center gap-3 mb-6">
+              <span className={`px-3 py-1 text-sm font-semibold border rounded-full ${priceColorClass}`}>
+                {priceLabel}
+              </span>
+              <span className="text-xs text-gray-500">Based on condition, mileage, and model year</span>
+            </div>
 
             <p className="text-gray-700 leading-relaxed mb-8">
               {car.description}
@@ -199,6 +282,82 @@ export function CarDetail() {
           </div>
         </div>
       </div>
+
+      {/* Loan & EMI Calculator Section */}
+      <section className="bg-white p-6 md:p-8 rounded-xl border border-gray-200">
+        <h2 className="text-2xl font-bold mb-6">Loan & EMI Calculator</h2>
+        
+        <div className="grid md:grid-cols-2 gap-8">
+          {/* Input Fields */}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Car Price (BDT)</label>
+              <input 
+                type="text" 
+                readOnly
+                value={`৳${car.price.toLocaleString()}`}
+                className="w-full px-4 py-2 border border-gray-200 bg-gray-50 rounded-lg text-gray-500 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Down Payment (BDT)</label>
+              <input 
+                type="number" 
+                min={0}
+                max={car.price}
+                value={downPayment || ''}
+                onChange={(e) => setDownPayment(Number(e.target.value))}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Loan Term</label>
+              <select 
+                value={loanTerm}
+                onChange={(e) => setLoanTerm(Number(e.target.value))}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none appearance-none bg-white"
+              >
+                <option value={12}>12 months</option>
+                <option value={24}>24 months</option>
+                <option value={36}>36 months</option>
+                <option value={48}>48 months</option>
+                <option value={60}>60 months</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Annual Interest Rate (%)</label>
+              <input 
+                type="number" 
+                min={0}
+                step={0.1}
+                value={interestRate || ''}
+                onChange={(e) => setInterestRate(Number(e.target.value))}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
+          </div>
+          
+          {/* Output Summary */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col justify-center items-center text-center">
+              <span className="text-gray-500 text-sm font-medium mb-1">Loan Amount</span>
+              <span className="text-xl font-bold text-gray-900">৳{loanAmount.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+            </div>
+            <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 flex flex-col justify-center items-center text-center">
+              <span className="text-blue-600 text-sm font-medium mb-1">Monthly EMI</span>
+              <span className="text-2xl font-bold text-blue-700">৳{monthlyEmi.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col justify-center items-center text-center">
+              <span className="text-gray-500 text-sm font-medium mb-1">Total Interest</span>
+              <span className="text-lg font-semibold text-gray-800">৳{totalInterest.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col justify-center items-center text-center">
+              <span className="text-gray-500 text-sm font-medium mb-1">Total Payment</span>
+              <span className="text-lg font-semibold text-gray-800">৳{totalPayment.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Reviews Section */}
       <section className="bg-white p-6 md:p-8 rounded-xl border border-gray-200">

@@ -1,14 +1,17 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { mockCars } from '../data/cars';
+import { useCars } from '../hooks/useCars';
 import { useCompare } from '../hooks/useCompare';
-import { X, ArrowRightLeft, Info } from 'lucide-react';
+import { X, ArrowRightLeft, Info, Plus } from 'lucide-react';
 
+// Compare component: Shows a side-by-side specification table for up to 3 selected cars,
+// allowing users to contrast their features directly.
 export function Compare() {
   const { compareIds, toggleCompare, clearCompare } = useCompare();
+  const { cars, loading } = useCars();
 
   // Find the actual car objects to compare based on the IDs stored in local state
-  const carsToCompare = mockCars.filter(car => compareIds.includes(car.id));
+  const carsToCompare = cars.filter(car => compareIds.includes(car.id));
 
   // Helper row component for the comparison table
   const SpecRow = ({ label, values, isBold = false }: { label: string, values: React.ReactNode[], isBold?: boolean }) => (
@@ -49,7 +52,13 @@ export function Compare() {
         )}
       </div>
 
-      {carsToCompare.length === 0 ? (
+      {loading ? (
+        <div className="bg-white p-12 rounded-2xl border border-gray-200 text-center space-y-4 shadow-sm">
+          <p className="text-gray-500 max-w-md mx-auto">
+            Loading cars...
+          </p>
+        </div>
+      ) : carsToCompare.length === 0 ? (
         <div className="bg-white p-12 rounded-2xl border border-gray-200 text-center space-y-4 shadow-sm">
           <div className="w-16 h-16 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center mx-auto">
             <Info size={28} />
@@ -88,7 +97,7 @@ export function Compare() {
                           src={car.image} 
                           alt={car.model} 
                           className="w-full h-full object-cover hover:scale-105 transition" 
-                          onError={(e) => { e.currentTarget.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'; }} // onError fallback ensures a placeholder shows if the image URL ever fails to load
+                          onError={(e) => { (e.target as HTMLImageElement).src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'; }} // Fallback image shown if the main image URL fails to load
                         />
                       </div>
                       <h3 className="font-bold text-lg text-gray-900 leading-tight hover:text-blue-600 transition">

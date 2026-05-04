@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useOutlet } from 'react-router-dom';
-import { Car, Search, ArrowRightLeft } from 'lucide-react';
+import { Car, Search, ArrowRightLeft, LogIn, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useAuth } from '../contexts/AuthContext';
 
 export function Layout() {
   const [compareCount, setCompareCount] = useState(0);
   const location = useLocation();
   const element = useOutlet();
+  const { user, signIn, logOut } = useAuth();
 
   // Sync with localStorage manually since we aren't using a global state provider like Redux
   useEffect(() => {
@@ -54,6 +56,17 @@ export function Layout() {
             <Link to="/sell" className="text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 active:scale-95 transition-all px-4 py-2 rounded-lg shadow-sm">
               Sell a Car
             </Link>
+            {user ? (
+              <button onClick={logOut} className="text-sm font-medium text-gray-600 hover:text-red-500 transition flex items-center gap-1.5">
+                <LogOut size={16} />
+                Sign Out
+              </button>
+            ) : (
+              <button onClick={signIn} className="text-sm font-medium text-gray-600 hover:text-green-600 transition flex items-center gap-1.5">
+                <LogIn size={16} />
+                Sign In
+              </button>
+            )}
           </nav>
         </div>
       </header>

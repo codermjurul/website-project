@@ -1,11 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { mockCars } from '../data/cars';
+import { useCars } from '../hooks/useCars';
 import { ShieldCheck, Tags, Search } from 'lucide-react';
 
+// Home component: Renders the landing page of the application,
+// displaying a hero section, features outline, and a few featured cars.
 export function Home() {
+  const { cars } = useCars();
   // Get a few featured cars to display on the homepage
-  const featuredCars = mockCars.slice(0, 3);
+  const featuredCars = cars.slice(0, 3);
 
   return (
     <div className="space-y-16">
@@ -63,8 +66,19 @@ export function Home() {
           </Link>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {featuredCars.map((car) => (
+        {cars.length === 0 ? (
+          <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
+             <p className="text-gray-500 mb-4">You have no cars in the database.</p>
+             <Link 
+               to="/browse"
+               className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-medium py-2 px-4 rounded transition-all text-sm shadow-sm"
+             >
+               Go to Browse to Seed DB
+             </Link>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {featuredCars.map((car) => (
             <Link 
               key={car.id} 
               to={`/car/${car.id}`} 
@@ -75,7 +89,7 @@ export function Home() {
                   src={car.image} 
                   alt={`${car.brand} ${car.model}`} 
                   className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                  onError={(e) => { e.currentTarget.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'; }} // onError fallback ensures a placeholder shows if the image URL ever fails to load
+                  onError={(e) => { (e.target as HTMLImageElement).src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'; }} // Fallback image shown if the main image URL fails to load
                 />
                 <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md text-xs font-semibold text-gray-800">
                   {car.year}
@@ -97,15 +111,16 @@ export function Home() {
                 {/* Meta details footer */}
                 <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
                   <span>{car.mileage.toLocaleString()} km</span>
-                  <span>â¢</span>
+                  <span>&middot;</span>
                   <span>{car.importation}</span>
-                  <span>â¢</span>
+                  <span>&middot;</span>
                   <span>{car.condition}</span>
                 </div>
               </div>
             </Link>
           ))}
         </div>
+        )}
       </section>
     </div>
   );

@@ -1,0 +1,46 @@
+{
+  "entities": {
+    "Review": {
+      "title": "Review",
+      "description": "A review for a car.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userName": { "type": "string" },
+        "rating": { "type": "number" },
+        "comment": { "type": "string" },
+        "date": { "type": "string" }
+      },
+      "required": ["id", "userName", "rating", "comment", "date"]
+    },
+    "Car": {
+      "title": "Car",
+      "description": "A car listing in the marketplace.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "ownerId": { "type": "string", "description": "The UID of the user who listed the car" },
+        "brand": { "type": "string" },
+        "model": { "type": "string" },
+        "year": { "type": "number" },
+        "price": { "type": "number" },
+        "importation": { "type": "string" },
+        "condition": { "type": "string" },
+        "mileage": { "type": "number" },
+        "fuelType": { "type": "string" },
+        "transmission": { "type": "string" },
+        "image": { "type": "string" },
+        "description": { "type": "string" },
+        "reviews": { "type": "array", "items": { "$ref": "#/entities/Review" } },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["brand", "model", "year", "price", "image", "description", "ownerId"]
+    }
+  },
+  "firestore": {
+    "cars": {
+      "schema": "Car",
+      "description": "Collection of cars available in the marketplace."
+    }
+  }
+}

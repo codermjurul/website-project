@@ -38,7 +38,7 @@ export const mockCars: Car[] = [
     mileage: 15000,
     fuelType: 'Hybrid',
     transmission: 'Automatic',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/2021_Toyota_Camry_%28ASV70R%29_Ascent_sedan_%282021-10-21%29_01.jpg/1280px-2021_Toyota_Camry_%28ASV70R%29_Ascent_sedan_%282021-10-21%29_01.jpg',
+    image: 'https://pixabay.com/images/download/ahsing888-car-7095541_1920.jpg',
     description: 'A reliable and fuel-efficient mid-size sedan perfect for daily commuting.',
     reviews: [
       { id: 'r1', userName: 'John D.', rating: 5, comment: 'Amazing fuel economy, very smooth ride.', date: '2023-10-12' },
@@ -56,7 +56,7 @@ export const mockCars: Car[] = [
     mileage: 30000,
     fuelType: 'Petrol',
     transmission: 'Automatic',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/2022_Honda_Civic_Sport_%28facelift%2C_blue%29%2C_front_8.21.22.jpg/1280px-2022_Honda_Civic_Sport_%28facelift%2C_blue%29%2C_front_8.21.22.jpg',
+    image: 'https://pixabay.com/images/download/domenik2212-honda-4384888_1920.jpg',
     description: 'Sporty compact car with excellent handling and spacious interior.',
     reviews: [
       { id: 'r3', userName: 'Mike T.', rating: 4, comment: 'Love the sporty look.', date: '2024-01-15' }
@@ -73,7 +73,7 @@ export const mockCars: Car[] = [
     mileage: 5000,
     fuelType: 'Electric',
     transmission: 'Automatic',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/2019_Tesla_Model_3_Performance_AWD_%28facelift%2C_red%29%2C_front_8.15.19.jpg/1280px-2019_Tesla_Model_3_Performance_AWD_%28facelift%2C_red%29%2C_front_8.15.19.jpg',
+    image: 'https://pixabay.com/images/download/capitalstreet_fx06-tesla-5937063_1920.jpg',
     description: 'All-electric sedan with cutting edge technology and autopilot features.',
     reviews: [
       { id: 'r4', userName: 'Alex W.', rating: 5, comment: 'The acceleration is unbelievable!', date: '2024-02-20' }
@@ -90,7 +90,7 @@ export const mockCars: Car[] = [
     mileage: 60000,
     fuelType: 'Petrol',
     transmission: 'Manual',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/2019_Ford_Mustang_GT_fastback_%28facelift%2C_orange%29%2C_front_8.15.19.jpg/1280px-2019_Ford_Mustang_GT_fastback_%28facelift%2C_orange%29%2C_front_8.15.19.jpg',
+    image: 'https://pixabay.com/images/download/domaxi198-shelby-3821709_1920.jpg',
     description: 'Classic American muscle car with a powerful V8 engine.',
     reviews: []
   },
@@ -105,7 +105,7 @@ export const mockCars: Car[] = [
     mileage: 45000,
     fuelType: 'Electric',
     transmission: 'Automatic',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/sixty/2019_Nissan_Leaf_ZE1_E+_%28facelift%29%2C_front_9.18.19.jpg/1280px-2019_Nissan_Leaf_ZE1_E+_%28facelift%29%2C_front_9.18.19.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/2019_Nissan_Leaf_ZE1_40_kWh%2C_front_8.15.19.jpg/1280px-2019_Nissan_Leaf_ZE1_40_kWh%2C_front_8.15.19.jpg',
     description: 'Affordable electric vehicle, great for city driving.',
     reviews: [
       { id: 'r5', userName: 'Emma O.', rating: 4, comment: 'Perfect first EV for me. Range is okay.', date: '2023-09-10' }
@@ -114,7 +114,7 @@ export const mockCars: Car[] = [
   {
     id: '6',
     brand: 'Toyota',
-    model: 'Corolla',
+    model: 'GT86',
     year: 2018,
     price: 1650000,
     importation: 'Imported',
@@ -122,8 +122,8 @@ export const mockCars: Car[] = [
     mileage: 80000,
     fuelType: 'Petrol',
     transmission: 'Automatic',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/2019_Toyota_Corolla_sedan_%28facelift%2C_white%29%2C_front_8.15.19.jpg/1280px-2019_Toyota_Corolla_sedan_%28facelift%2C_white%29%2C_front_8.15.19.jpg',
-    description: 'The standard for reliability. Runs forever with basic maintenance.',
+    image: 'https://pixabay.com/images/download/hscarphotographie-luxury-car-6602359_1920.jpg',
+    description: 'A brilliant sports car. Handles exceptionally and brings joy to everyday driving.',
     reviews: []
   }
 ];
