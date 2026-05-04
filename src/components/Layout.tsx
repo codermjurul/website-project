@@ -28,10 +28,11 @@ export function Layout() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 text-gray-900 font-sans">
-      {/* ... keeping the rest the same ... */}
+      {/* Top Header Section */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           
+          {/* Logo and App Name */}
           <Link to="/" className="flex items-center gap-2 group active:scale-95 transition-transform">
             <div className="bg-blue-600 text-white p-1.5 rounded-lg group-hover:bg-blue-700 transition-colors">
               <Car size={24} />
@@ -39,12 +40,13 @@ export function Layout() {
             <span className="text-xl font-bold tracking-tight">AutoTrade</span>
           </Link>
 
-          <nav className="flex items-center gap-6">
-            <Link to="/browse" className="text-sm font-medium text-gray-600 hover:text-blue-600 active:scale-95 transition flex items-center gap-1.5">
+          {/* Navigation Links */}
+          <nav className="flex items-center gap-4 sm:gap-6 overflow-x-auto">
+            <Link to="/browse" className="text-sm font-medium text-gray-600 hover:text-blue-600 active:scale-95 transition flex items-center gap-1.5 whitespace-nowrap">
               <Search size={16} />
               Browse Cars
             </Link>
-            <Link to="/compare" className="text-sm font-medium text-gray-600 hover:text-blue-600 active:scale-95 transition flex items-center gap-1.5 relative">
+            <Link to="/compare" className="text-sm font-medium text-gray-600 hover:text-blue-600 active:scale-95 transition flex items-center gap-1.5 relative whitespace-nowrap">
               <ArrowRightLeft size={16} />
               Compare
               {compareCount > 0 && (
@@ -53,7 +55,7 @@ export function Layout() {
                 </span>
               )}
             </Link>
-            <Link to="/sell" className="text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 active:scale-95 transition-all px-4 py-2 rounded-lg shadow-sm">
+            <Link to="/sell" className="text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 active:scale-95 transition-all px-4 py-2 rounded-lg shadow-sm whitespace-nowrap">
               Sell a Car
             </Link>
             {/* Auth buttons removed for demo */}
@@ -61,6 +63,7 @@ export function Layout() {
         </div>
       </header>
 
+      {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
         <AnimatePresence mode="wait">
           <motion.div
