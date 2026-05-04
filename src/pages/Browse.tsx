@@ -152,16 +152,6 @@ export function Browse() {
               >
                 Clear filters
               </button>
-              {cars.length === 0 && (
-                <button 
-                  onClick={async () => {
-                    await seedDatabase();
-                  }}
-                  className="bg-green-600 hover:bg-green-700 active:scale-95 text-white font-medium py-2 px-4 rounded transition-all text-sm shadow-sm"
-                >
-                  Load Demo Data
-                </button>
-              )}
             </div>
           </div>
         ) : (

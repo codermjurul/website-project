@@ -38,7 +38,7 @@ export const mockCars: Car[] = [
     mileage: 15000,
     fuelType: 'Hybrid',
     transmission: 'Automatic',
-    image: 'https://pixabay.com/images/download/ahsing888-car-7095541_1920.jpg',
+    image: 'https://res.cloudinary.com/dc1ydrkx7/image/upload/q_auto/f_auto/v1777924820/Toyota_Camry_V0012_t1fd4q.avif',
     description: 'A reliable and fuel-efficient mid-size sedan perfect for daily commuting.',
     reviews: [
       { id: 'r1', userName: 'John D.', rating: 5, comment: 'Amazing fuel economy, very smooth ride.', date: '2023-10-12' },
@@ -56,7 +56,7 @@ export const mockCars: Car[] = [
     mileage: 30000,
     fuelType: 'Petrol',
     transmission: 'Automatic',
-    image: 'https://pixabay.com/images/download/domenik2212-honda-4384888_1920.jpg',
+    image: 'https://res.cloudinary.com/dc1ydrkx7/image/upload/q_auto/f_auto/v1777924820/Honda_Civic_e-HEV_Sport_June_30_2024_xiky6b.jpg',
     description: 'Sporty compact car with excellent handling and spacious interior.',
     reviews: [
       { id: 'r3', userName: 'Mike T.', rating: 4, comment: 'Love the sporty look.', date: '2024-01-15' }
@@ -73,7 +73,7 @@ export const mockCars: Car[] = [
     mileage: 5000,
     fuelType: 'Electric',
     transmission: 'Automatic',
-    image: 'https://pixabay.com/images/download/capitalstreet_fx06-tesla-5937063_1920.jpg',
+    image: 'https://res.cloudinary.com/dc1ydrkx7/image/upload/q_auto/f_auto/v1777924822/Tesla_Model_3_Buyers_Guide_qhddus.avif',
     description: 'All-electric sedan with cutting edge technology and autopilot features.',
     reviews: [
       { id: 'r4', userName: 'Alex W.', rating: 5, comment: 'The acceleration is unbelievable!', date: '2024-02-20' }
@@ -90,7 +90,7 @@ export const mockCars: Car[] = [
     mileage: 60000,
     fuelType: 'Petrol',
     transmission: 'Manual',
-    image: 'https://pixabay.com/images/download/domaxi198-shelby-3821709_1920.jpg',
+    image: 'https://res.cloudinary.com/dc1ydrkx7/image/upload/q_auto/f_auto/v1777924820/Ford_Mustang_Bronze_Pack_Thumbnail_ekab0c.jpg',
     description: 'Classic American muscle car with a powerful V8 engine.',
     reviews: []
   },
@@ -105,7 +105,7 @@ export const mockCars: Car[] = [
     mileage: 45000,
     fuelType: 'Electric',
     transmission: 'Automatic',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/2019_Nissan_Leaf_ZE1_40_kWh%2C_front_8.15.19.jpg/1280px-2019_Nissan_Leaf_ZE1_40_kWh%2C_front_8.15.19.jpg',
+    image: 'https://res.cloudinary.com/dc1ydrkx7/image/upload/q_auto/f_auto/v1777924820/2026_Nissan_Leaf_oz5sjl.avif',
     description: 'Affordable electric vehicle, great for city driving.',
     reviews: [
       { id: 'r5', userName: 'Emma O.', rating: 4, comment: 'Perfect first EV for me. Range is okay.', date: '2023-09-10' }
@@ -122,7 +122,7 @@ export const mockCars: Car[] = [
     mileage: 80000,
     fuelType: 'Petrol',
     transmission: 'Automatic',
-    image: 'https://pixabay.com/images/download/hscarphotographie-luxury-car-6602359_1920.jpg',
+    image: 'https://res.cloudinary.com/dc1ydrkx7/image/upload/q_auto/f_auto/v1777924821/Toyota_GT86_Front_View_Sept_17_2012_b2ig04.jpg',
     description: 'A brilliant sports car. Handles exceptionally and brings joy to everyday driving.',
     reviews: []
   }

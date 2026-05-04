@@ -12,47 +12,16 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Use a mocked demo user to disable authentication
+  const [user] = useState<any>({
+    id: 'demo-user-id',
+    email: 'demo@example.com',
+    user_metadata: { full_name: 'Demo User' }
+  });
+  const [loading] = useState(false);
 
-  useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const signIn = async () => {
-    try {
-      await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin
-        }
-      });
-    } catch (error) {
-      console.error("Error signing in with Google", error);
-    }
-  };
-
-  const logOut = async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch (error) {
-      console.error("Error signing out", error);
-    }
-  };
+  const signIn = async () => {};
+  const logOut = async () => {};
 
   return (
     <AuthContext.Provider value={{ user, loading, signIn, logOut }}>

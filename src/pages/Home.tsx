@@ -68,13 +68,7 @@ export function Home() {
 
         {cars.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
-             <p className="text-gray-500 mb-4">You have no cars in the database.</p>
-             <Link 
-               to="/browse"
-               className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-medium py-2 px-4 rounded transition-all text-sm shadow-sm"
-             >
-               Go to Browse to Seed DB
-             </Link>
+             <p className="text-gray-500 mb-4">No cars available. Please run the Supabase schema script setup.</p>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

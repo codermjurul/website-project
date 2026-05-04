@@ -37,13 +37,13 @@ export function useCars() {
 
   const seedDatabase = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Must be logged in to seed database");
+      // Use demo user ID since auth is disabled
+      const ownerId = 'admin-seed-id';
 
       for (const car of mockCars) {
         const { error } = await supabase.from('cars').insert({
           ...car,
-          ownerId: user.id,
+          ownerId: ownerId,
           createdAt: new Date().toISOString()
         });
         if (error) throw error;
@@ -56,12 +56,11 @@ export function useCars() {
 
   const addCar = async (car: Car) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Must be logged in to add a car");
+      const ownerId = 'demo-user-id';
 
       const { error } = await supabase.from('cars').insert({
         ...car,
-        ownerId: user.id,
+        ownerId: ownerId,
         createdAt: new Date().toISOString()
       });
       if (error) throw error;
