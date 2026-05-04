@@ -2,12 +2,14 @@ import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Car } from '../data/cars';
 import { useCars } from '../hooks/useCars';
-import { Filter, SlidersHorizontal, Plus } from 'lucide-react';
+import { useCompare } from '../hooks/useCompare';
+import { Filter, SlidersHorizontal, Plus, ArrowRightLeft } from 'lucide-react';
 
 // Browse component: Renders a browseable list of all cars,
 // including real-time text search, brand/category filtering, and sorting functionality.
 export function Browse() {
   const { cars, loading, seedDatabase } = useCars();
+  const { compareIds, toggleCompare } = useCompare();
   const allCars = cars;
   
   // --- State for Filtering and Sorting ---
@@ -22,7 +24,7 @@ export function Browse() {
   // --- Filtering & Sorting Logic ---
   // useMemo ensures we only recalculate when dependencies change
   const filteredCars = useMemo(() => {
-    let result = allCars;
+    let result = [...allCars];
 
     // Filter by Search (Brand or Model)
     if (searchTerm) {
@@ -55,7 +57,7 @@ export function Browse() {
     });
 
     return result;
-  }, [searchTerm, filterBrand, filterImport, sortBy]);
+  }, [searchTerm, filterBrand, filterImport, sortBy, allCars]);
 
   return (
     <div className="flex flex-col md:flex-row gap-8">
@@ -167,7 +169,8 @@ export function Browse() {
                     src={car.image} 
                     alt={`${car.brand} ${car.model}`} 
                     className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                    onError={(e) => { (e.target as HTMLImageElement).src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'; }} // Fallback image shown if the main image URL fails to load
+                    referrerPolicy="no-referrer"
+                    onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'; }} // Fallback image shown if the main image URL fails to load
                   />
                   <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md text-xs font-semibold text-gray-800">
                     {car.year}
@@ -183,10 +186,27 @@ export function Browse() {
                     </span>
                   </div>
                   
-                  <div className="mt-auto pt-4 flex flex-wrap gap-2 text-xs font-medium text-gray-500">
-                    <span className="bg-gray-100 px-2 py-1 rounded">{car.fuelType}</span>
-                    <span className="bg-gray-100 px-2 py-1 rounded">{car.transmission}</span>
-                    <span className="bg-gray-100 px-2 py-1 rounded">{car.condition} Condition</span>
+                  <div className="mt-auto pt-4 flex flex-wrap items-center justify-between gap-2 text-xs font-medium text-gray-500">
+                    <div className="flex flex-wrap gap-2">
+                      <span className="bg-gray-100 px-2 py-1 rounded">{car.fuelType}</span>
+                      <span className="bg-gray-100 px-2 py-1 rounded">{car.transmission}</span>
+                      <span className="bg-gray-100 px-2 py-1 rounded">{car.condition} Condition</span>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        toggleCompare(car.id);
+                      }}
+                      className={`flex items-center justify-center p-2 rounded-full transition-colors ${
+                        compareIds.includes(car.id)
+                          ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                      aria-label="Toggle Compare"
+                      title={compareIds.includes(car.id) ? "Remove from Compare" : "Add to Compare"}
+                    >
+                      <ArrowRightLeft size={16} />
+                    </button>
                   </div>
                 </div>
               </Link>

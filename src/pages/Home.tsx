@@ -1,12 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useCars } from '../hooks/useCars';
-import { ShieldCheck, Tags, Search } from 'lucide-react';
+import { useCompare } from '../hooks/useCompare';
+import { ShieldCheck, Tags, Search, ArrowRightLeft } from 'lucide-react';
 
 // Home component: Renders the landing page of the application,
 // displaying a hero section, features outline, and a few featured cars.
 export function Home() {
   const { cars } = useCars();
+  const { compareIds, toggleCompare } = useCompare();
   // Get a few featured cars to display on the homepage
   const featuredCars = cars.slice(0, 3);
 
@@ -83,7 +85,8 @@ export function Home() {
                   src={car.image} 
                   alt={`${car.brand} ${car.model}`} 
                   className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                  onError={(e) => { (e.target as HTMLImageElement).src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'; }} // Fallback image shown if the main image URL fails to load
+                  referrerPolicy="no-referrer"
+                  onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'; }} // Fallback image shown if the main image URL fails to load
                 />
                 <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md text-xs font-semibold text-gray-800">
                   {car.year}
@@ -104,11 +107,28 @@ export function Home() {
                 
                 {/* Meta details footer */}
                 <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
-                  <span>{car.mileage.toLocaleString()} km</span>
-                  <span>&middot;</span>
-                  <span>{car.importation}</span>
-                  <span>&middot;</span>
-                  <span>{car.condition}</span>
+                  <div className="flex items-center gap-2">
+                    <span>{car.mileage.toLocaleString()} km</span>
+                    <span>&middot;</span>
+                    <span>{car.importation}</span>
+                    <span>&middot;</span>
+                    <span>{car.condition}</span>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      toggleCompare(car.id);
+                    }}
+                    className={`flex items-center justify-center p-2 rounded-full transition-colors ${
+                      compareIds.includes(car.id)
+                        ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                    aria-label="Toggle Compare"
+                    title={compareIds.includes(car.id) ? "Remove from Compare" : "Add to Compare"}
+                  >
+                    <ArrowRightLeft size={16} />
+                  </button>
                 </div>
               </div>
             </Link>

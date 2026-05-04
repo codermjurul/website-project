@@ -41,7 +41,7 @@ export function useCars() {
       const ownerId = 'admin-seed-id';
 
       for (const car of mockCars) {
-        const { error } = await supabase.from('cars').insert({
+        const { error } = await supabase.from('cars').upsert({
           ...car,
           ownerId: ownerId,
           createdAt: new Date().toISOString()
@@ -58,14 +58,25 @@ export function useCars() {
     try {
       const ownerId = 'demo-user-id';
 
+      // Optimistically add to local state immediately
+      setCars(prev => [car, ...prev]);
+
       const { error } = await supabase.from('cars').insert({
         ...car,
         ownerId: ownerId,
         createdAt: new Date().toISOString()
       });
-      if (error) throw error;
+      
+      if (error) {
+        // If it's an RLS error, we don't throw immediately so the demo user doesn't get blocked entirely,
+        // BUT we should throw if we want the form to show the error. Let's throw the error.
+        // The optimistic update will stay in memory until a refresh.
+        throw error;
+      }
     } catch (err: any) {
       console.error('Error adding car:', err.message);
+      // For demo purposes, we added the car locally so it shows up in the feed.
+      // We still throw so the form can show a warning or clear the loading state.
       throw err;
     }
   };

@@ -1,5 +1,5 @@
 -- Create the cars table
-CREATE TABLE "cars" (
+CREATE TABLE IF NOT EXISTS "cars" (
   "id" TEXT PRIMARY KEY,
   "ownerId" TEXT NOT NULL,
   "brand" TEXT NOT NULL,
@@ -23,24 +23,28 @@ CREATE TABLE "cars" (
 ALTER TABLE "cars" ENABLE ROW LEVEL SECURITY;
 
 -- Allow anyone to read cars
+DROP POLICY IF EXISTS "Anyone can read cars" ON "cars";
 CREATE POLICY "Anyone can read cars"
 ON "cars"
 FOR SELECT
 USING (true);
 
 -- Allow anyone to create cars
+DROP POLICY IF EXISTS "Anyone can create cars" ON "cars";
 CREATE POLICY "Anyone can create cars"
 ON "cars"
 FOR INSERT
 WITH CHECK (true);
 
 -- Allow anyone to update cars
+DROP POLICY IF EXISTS "Anyone can update cars" ON "cars";
 CREATE POLICY "Anyone can update cars"
 ON "cars"
 FOR UPDATE
 USING (true);
 
 -- Allow anyone to delete cars
+DROP POLICY IF EXISTS "Anyone can delete cars" ON "cars";
 CREATE POLICY "Anyone can delete cars"
 ON "cars"
 FOR DELETE
@@ -53,4 +57,5 @@ INSERT INTO "cars" ("id", "ownerId", "brand", "model", "year", "price", "importa
 ('3', 'admin-seed-id', 'Tesla', 'Model 3', 2023, 4400000, 'Imported', 'Excellent', 'Electric', 'Automatic', 5000, 'https://res.cloudinary.com/dc1ydrkx7/image/upload/q_auto/f_auto/v1777924822/Tesla_Model_3_Buyers_Guide_qhddus.avif', 'All-electric sedan with cutting edge technology and autopilot features.', 'AutoTrade', 'support@autotrade.com', '[{"id": "r4", "userName": "Alex W.", "rating": 5, "comment": "The acceleration is unbelievable!", "date": "2024-02-20"}]'::jsonb, '2023-10-10T10:00:00Z'),
 ('4', 'admin-seed-id', 'Ford', 'Mustang', 2019, 3850000, 'Local', 'Fair', 'Petrol', 'Manual', 60000, 'https://res.cloudinary.com/dc1ydrkx7/image/upload/q_auto/f_auto/v1777924820/Ford_Mustang_Bronze_Pack_Thumbnail_ekab0c.jpg', 'Classic American muscle car with a powerful V8 engine.', 'AutoTrade', 'support@autotrade.com', '[]'::jsonb, '2023-10-10T10:00:00Z'),
 ('5', 'admin-seed-id', 'Nissan', 'Leaf', 2020, 1980000, 'Local', 'Good', 'Electric', 'Automatic', 45000, 'https://res.cloudinary.com/dc1ydrkx7/image/upload/q_auto/f_auto/v1777924820/2026_Nissan_Leaf_oz5sjl.avif', 'Affordable electric vehicle, great for city driving.', 'AutoTrade', 'support@autotrade.com', '[{"id": "r5", "userName": "Emma O.", "rating": 4, "comment": "Perfect first EV for me. Range is okay.", "date": "2023-09-10"}]'::jsonb, '2023-10-10T10:00:00Z'),
-('6', 'admin-seed-id', 'Toyota', 'GT86', 2018, 1650000, 'Imported', 'Good', 'Petrol', 'Automatic', 80000, 'https://res.cloudinary.com/dc1ydrkx7/image/upload/q_auto/f_auto/v1777924821/Toyota_GT86_Front_View_Sept_17_2012_b2ig04.jpg', 'A brilliant sports car. Handles exceptionally and brings joy to everyday driving.', 'AutoTrade', 'support@autotrade.com', '[]'::jsonb, '2023-10-10T10:00:00Z');
+('6', 'admin-seed-id', 'Toyota', 'GT86', 2018, 1650000, 'Imported', 'Good', 'Petrol', 'Automatic', 80000, 'https://res.cloudinary.com/dc1ydrkx7/image/upload/q_auto/f_auto/v1777924821/Toyota_GT86_Front_View_Sept_17_2012_b2ig04.jpg', 'A brilliant sports car. Handles exceptionally and brings joy to everyday driving.', 'AutoTrade', 'support@autotrade.com', '[]'::jsonb, '2023-10-10T10:00:00Z')
+ON CONFLICT (id) DO UPDATE SET image = EXCLUDED.image, reviews = EXCLUDED.reviews;

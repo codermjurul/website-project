@@ -96,8 +96,9 @@ export function Compare() {
                         <img 
                           src={car.image} 
                           alt={car.model} 
-                          className="w-full h-full object-cover hover:scale-105 transition" 
-                          onError={(e) => { (e.target as HTMLImageElement).src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'; }} // Fallback image shown if the main image URL fails to load
+                          className="w-full h-full object-cover hover:scale-105 transition"
+                          referrerPolicy="no-referrer"
+                          onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'; }} // Fallback image shown if the main image URL fails to load
                         />
                       </div>
                       <h3 className="font-bold text-lg text-gray-900 leading-tight hover:text-blue-600 transition">

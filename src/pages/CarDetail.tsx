@@ -186,7 +186,8 @@ export function CarDetail() {
               src={car.image} 
               alt={`${car.brand} ${car.model}`} 
               className="w-full h-full object-cover" 
-              onError={(e) => { (e.target as HTMLImageElement).src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'; }} // Fallback image shown if the main image URL fails to load
+              referrerPolicy="no-referrer"
+              onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'; }} // Fallback image shown if the main image URL fails to load
             />
           </div>
 

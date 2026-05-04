@@ -101,30 +101,37 @@ export function SellCar() {
       await addCar(newCar);
       setSuccess(true);
       setError(null);
-      
-      // Reset form fields
-      setFormData({
-        brand: '',
-        model: '',
-        year: new Date().getFullYear(),
-        price: '',
-        importation: 'Local',
-        condition: 'Good',
-        fuelType: 'Petrol',
-        transmission: 'Automatic',
-        mileage: '',
-        description: '',
-        sellerName: '',
-        sellerEmail: ''
-      });
-      setImagePreview(null);
-
-      // Hide success message after 3 seconds
-      setTimeout(() => setSuccess(false), 3000);
+      resetForm();
     } catch (err: any) {
       console.error(err);
-      setError("There was a problem listing your car. Make sure you are authenticated and have filled all fields correctly.");
+      if (err?.message?.includes("row-level security")) {
+        // Technically an error in Supabase, but we updated the UI optimistically for the demo!
+        setSuccess(true);
+        setError("Note: Car was added to your local feed, but Supabase RLS policies blocked server saving. Run the SQL script in SUPABASE_SETUP.md to fix permanent storage.");
+        resetForm();
+      } else {
+        setError(`There was a problem listing your car: ${err.message || 'Make sure you are authenticated.'}`);
+      }
     }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      brand: '',
+      model: '',
+      year: new Date().getFullYear(),
+      price: '',
+      importation: 'Local',
+      condition: 'Good',
+      fuelType: 'Petrol',
+      transmission: 'Automatic',
+      mileage: '',
+      description: '',
+      sellerName: '',
+      sellerEmail: ''
+    });
+    setImagePreview(null);
+    setTimeout(() => setSuccess(false), 8000); // 8 seconds so they can read the warning
   };
 
   if (!user) {
@@ -173,8 +180,9 @@ export function SellCar() {
                   <img 
                     src={imagePreview} 
                     alt="Preview" 
-                    className="rounded-lg object-cover w-full h-56 border border-gray-200 shadow-sm" 
-                    onError={(e) => { e.currentTarget.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'; }} // onError fallback ensures a placeholder shows if the image URL ever fails to load
+                    className="rounded-lg object-cover w-full h-56 border border-gray-200 shadow-sm"
+                    referrerPolicy="no-referrer"
+                    onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'; }} // onError fallback ensures a placeholder shows if the image URL ever fails to load
                   />
                   <button 
                     type="button" 
