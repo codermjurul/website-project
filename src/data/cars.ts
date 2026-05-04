@@ -8,6 +8,7 @@ export interface Review {
   rating: number;
   comment: string;
   date: string;
+  isHidden?: boolean;
 }
 
 export interface Car {

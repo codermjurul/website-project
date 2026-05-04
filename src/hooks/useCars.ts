@@ -87,11 +87,38 @@ export function useCars() {
       if (!carToUpdate) throw new Error("Car not found");
 
       const newReviews = [...(carToUpdate.reviews || []), review];
+      
+      // Optimistically add to local state immediately
+      setCars(prevCars => prevCars.map(c => c.id === carId ? { ...c, reviews: newReviews } : c));
+
+      const { error } = await supabase.from('cars').update({ reviews: newReviews }).eq('id', carId);
+      
+      if (error) {
+        throw error;
+      }
+    } catch (err: any) {
+      console.error('Error adding review:', err.message);
+      throw err;
+    }
+  };
+
+  const toggleReviewVisibility = async (carId: string, reviewId: string, isHidden: boolean) => {
+    try {
+      const carToUpdate = getCar(carId);
+      if (!carToUpdate) throw new Error("Car not found");
+
+      const newReviews = (carToUpdate.reviews || []).map(r => 
+        r.id === reviewId ? { ...r, isHidden } : r
+      );
+      
+      // Optimistically add to local state immediately
+      setCars(prevCars => prevCars.map(c => c.id === carId ? { ...c, reviews: newReviews } : c));
+
       const { error } = await supabase.from('cars').update({ reviews: newReviews }).eq('id', carId);
       
       if (error) throw error;
     } catch (err: any) {
-      console.error('Error adding review:', err.message);
+      console.error('Error toggling review visibility:', err.message);
       throw err;
     }
   };
@@ -100,5 +127,5 @@ export function useCars() {
     return cars.find(c => c.id === id);
   };
 
-  return { cars, loading, error, addCar, addReview, getCar, seedDatabase };
+  return { cars, loading, error, addCar, addReview, toggleReviewVisibility, getCar, seedDatabase };
 }

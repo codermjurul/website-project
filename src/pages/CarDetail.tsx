@@ -4,14 +4,14 @@ import { Review } from '../data/cars';
 import { useCars } from '../hooks/useCars';
 import { useCompare } from '../hooks/useCompare';
 import { useAuth } from '../contexts/AuthContext';
-import { ArrowLeft, CheckCircle2, AlertCircle, Plus, Minus, MessageSquare, Star, ArrowRightLeft } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, AlertCircle, Plus, Minus, MessageSquare, Star, ArrowRightLeft, Eye, EyeOff } from 'lucide-react';
 
 // CarDetail component: Displays full details, specs, and a user review section for a single car.
 // Also provides functionality to leave a review and make a simulated counter-offer.
 export function CarDetail() {
   const { id } = useParams<{ id: string }>();
   const { compareIds, toggleCompare } = useCompare();
-  const { cars, loading, addReview } = useCars();
+  const { cars, loading, addReview, toggleReviewVisibility } = useCars();
   
   const { user, signIn } = useAuth();
   
@@ -374,16 +374,29 @@ export function CarDetail() {
         ) : (
           <div className="grid md:grid-cols-2 gap-6">
             {allReviews.map(review => (
-              <div key={review.id} className="p-4 border border-gray-100 rounded-lg bg-gray-50 shadow-sm">
+              <div key={review.id} className={`p-4 border border-gray-100 rounded-lg shadow-sm ${review.isHidden ? 'bg-gray-100 opacity-60' : 'bg-gray-50'}`}>
                 <div className="flex justify-between items-start mb-2">
-                  <span className="font-semibold text-gray-900">{review.userName}</span>
-                  <div className="flex items-center text-yellow-400">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} size={14} fill={i < review.rating ? "currentColor" : "none"} />
-                    ))}
+                  <span className="font-semibold text-gray-900">{review.userName} {review.isHidden && '(Hidden)'}</span>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => toggleReviewVisibility(car.id, review.id, !review.isHidden)}
+                      className="text-gray-400 hover:text-gray-600 focus:outline-none transition-colors"
+                      title={review.isHidden ? "Unhide Review" : "Hide Review"}
+                    >
+                      {review.isHidden ? <Eye size={16} /> : <EyeOff size={16} />}
+                    </button>
+                    <div className="flex items-center text-yellow-400">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star key={i} size={14} fill={i < review.rating ? "currentColor" : "none"} />
+                      ))}
+                    </div>
                   </div>
                 </div>
-                <p className="text-sm text-gray-600 italic mb-3">"{review.comment}"</p>
+                {!review.isHidden ? (
+                  <p className="text-sm text-gray-600 italic mb-3">"{review.comment}"</p>
+                ) : (
+                  <p className="text-sm text-gray-400 italic mb-3">This review has been hidden.</p>
+                )}
                 <div className="text-xs text-gray-400">{review.date}</div>
               </div>
             ))}
