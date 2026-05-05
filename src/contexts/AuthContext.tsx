@@ -1,6 +1,14 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabase';
+
+// Define a simple User interface instead of using Supabase's User
+export interface User {
+  id: string;
+  email: string;
+  user_metadata?: {
+    full_name?: string;
+    [key: string]: any;
+  };
+}
 
 interface AuthContextType {
   user: User | null;
@@ -13,7 +21,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   // Use a mocked demo user to disable authentication
-  const [user] = useState<any>({
+  const [user] = useState<User>({
     id: 'demo-user-id',
     email: 'demo@example.com',
     user_metadata: { full_name: 'Demo User' }
@@ -37,3 +45,4 @@ export function useAuth() {
   }
   return context;
 }
+

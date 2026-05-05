@@ -70,7 +70,7 @@ export function Home() {
 
         {cars.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
-             <p className="text-gray-500 mb-4">No cars available. Please run the Supabase schema script setup.</p>
+             <p className="text-gray-500 mb-4">No cars available. Wait for the server to seed the local database.</p>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

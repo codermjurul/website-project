@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useCars } from '../hooks/useCars';
 
 // SellCar component: Provides a form for users to list their own car for sale.
-// It uses Firebase to persist these user-submitted listings.
+// It uses the local SQLite backend to persist these user-submitted listings.
 export function SellCar() {
   const { user, signIn } = useAuth();
   const { addCar } = useCars();
@@ -104,14 +104,7 @@ export function SellCar() {
       resetForm();
     } catch (err: any) {
       console.error(err);
-      if (err?.message?.includes("row-level security")) {
-        // Technically an error in Supabase, but we updated the UI optimistically for the demo!
-        setSuccess(true);
-        setError("Note: Car was added to your local feed, but Supabase RLS policies blocked server saving. Run the SQL script in SUPABASE_SETUP.md to fix permanent storage.");
-        resetForm();
-      } else {
-        setError(`There was a problem listing your car: ${err.message || 'Make sure you are authenticated.'}`);
-      }
+      setError(`There was a problem listing your car: ${err.message || 'Make sure you are authenticated.'}`);
     }
   };
 
