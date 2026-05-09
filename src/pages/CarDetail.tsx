@@ -30,6 +30,8 @@ export function CarDetail() {
   
   // useState controls the temporary success message visibility
   const [reviewSuccess, setReviewSuccess] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
   // Cars are coming from firestore now, so we no longer need localStorage for reviews
   const allReviews = car?.reviews || [];
@@ -125,6 +127,7 @@ export function CarDetail() {
     };
 
     try {
+      setIsSubmittingReview(true);
       await addReview(car.id, newReview);
       
       // Clear form fields
@@ -132,12 +135,15 @@ export function CarDetail() {
       setReviewRating(5);
       setReviewComment('');
       
+      setReviewError(null);
       // Show success message
       setReviewSuccess(true);
       setTimeout(() => setReviewSuccess(false), 3000);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert('Failed to add review. Make sure you are signed in.');
+      setReviewError(err.message || 'Failed to add review. Try again.');
+    } finally {
+      setIsSubmittingReview(false);
     }
   };
 
@@ -407,6 +413,12 @@ export function CarDetail() {
       {/* Leave a Review Section */}
       <section className="bg-white p-6 md:p-8 rounded-xl border border-gray-200">
         <h3 className="text-xl font-bold mb-6">Leave a Review</h3>
+        {reviewError && (
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg flex items-center gap-3">
+            <AlertCircle size={20} className="text-red-500" />
+            {reviewError}
+          </div>
+        )}
         {reviewSuccess ? (
           <div className="bg-green-50 border border-green-200 text-green-700 p-4 rounded-lg flex items-center gap-3">
             <CheckCircle2 size={20} className="text-green-500" />
@@ -453,9 +465,10 @@ export function CarDetail() {
             </div>
             <button 
               type="submit" 
-              className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-medium py-2.5 px-6 rounded-lg transition-all shadow-sm"
+              disabled={isSubmittingReview}
+              className={`text-white font-medium py-2.5 px-6 rounded-lg transition-all shadow-sm ${isSubmittingReview ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 active:scale-95'}`}
             >
-              Submit Review
+              {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
             </button>
           </form>
         )}

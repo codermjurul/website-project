@@ -14,6 +14,8 @@ export function SellCar() {
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   // Controlled form state to manage user inputs
   const [formData, setFormData] = useState({
     brand: '',
@@ -98,6 +100,7 @@ export function SellCar() {
     };
 
     try {
+      setIsSubmitting(true);
       await addCar(newCar);
       setSuccess(true);
       setError(null);
@@ -105,6 +108,8 @@ export function SellCar() {
     } catch (err: any) {
       console.error(err);
       setError(`There was a problem listing your car: ${err.message || 'Make sure you are authenticated.'}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -155,6 +160,13 @@ export function SellCar() {
           <div className="mb-6 bg-green-50 border border-green-200 text-green-700 p-4 rounded-lg flex items-center gap-3 animate-in fade-in zoom-in duration-300">
             <CheckCircle2 size={24} className="text-green-500" />
             <span className="font-medium animate-pulse">Your car has been listed successfully!</span>
+          </div>
+        )}
+
+        {error && (
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg flex items-center gap-3 animate-in fade-in zoom-in duration-300">
+            <AlertCircle size={24} className="text-red-500" />
+            <span className="font-medium">{error}</span>
           </div>
         )}
 
@@ -296,8 +308,8 @@ export function SellCar() {
             </div>
           </div>
 
-          <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold py-3.5 px-6 rounded-xl transition-all shadow-md text-lg">
-            List Car for Sale
+          <button type="submit" disabled={isSubmitting} className={`w-full ${isSubmitting ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 active:scale-95'} text-white font-bold py-3.5 px-6 rounded-xl transition-all shadow-md text-lg`}>
+            {isSubmitting ? 'Listing...' : 'List Car for Sale'}
           </button>
         </form>
       </div>
