@@ -11,10 +11,23 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Initialize SQLite database
-const db = new Database('cars.db', { verbose: console.log });
+import fs from "fs";
+const dbPath = path.join(process.cwd(), 'cars.db');
+let db: Database.Database;
+
+try {
+  db = new Database(dbPath, { verbose: console.log });
+  // Test connection and integrity
+  db.prepare('PRAGMA integrity_check').get();
+} catch (error: any) {
+  console.error("Database initialization failed. It might be corrupted. Deleting and recreating...", error);
+  if (fs.existsSync(dbPath)) fs.unlinkSync(dbPath);
+  db = new Database(dbPath, { verbose: console.log });
+}
 
 // Create tables
-db.exec(`
+try {
+  db.exec(`
   CREATE TABLE IF NOT EXISTS cars (
     id TEXT PRIMARY KEY,
     ownerId TEXT,
@@ -42,6 +55,39 @@ db.exec(`
     FOREIGN KEY (carId) REFERENCES cars(id) ON DELETE CASCADE
   );
 `);
+} catch (error: any) {
+  console.error("Failed to create tables, database may be corrupted:", error);
+  if (fs.existsSync(dbPath)) fs.unlinkSync(dbPath);
+  db = new Database(dbPath, { verbose: console.log });
+  db.exec(`
+  CREATE TABLE IF NOT EXISTS cars (
+    id TEXT PRIMARY KEY,
+    ownerId TEXT,
+    brand TEXT NOT NULL,
+    model TEXT NOT NULL,
+    year INTEGER NOT NULL,
+    price REAL NOT NULL,
+    importation TEXT NOT NULL,
+    condition TEXT NOT NULL,
+    mileage INTEGER NOT NULL,
+    fuelType TEXT NOT NULL,
+    transmission TEXT NOT NULL,
+    image TEXT NOT NULL,
+    description TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS reviews (
+    id TEXT PRIMARY KEY,
+    carId TEXT NOT NULL,
+    userName TEXT NOT NULL,
+    rating INTEGER NOT NULL,
+    comment TEXT NOT NULL,
+    date TEXT NOT NULL,
+    isHidden INTEGER DEFAULT 0,
+    FOREIGN KEY (carId) REFERENCES cars(id) ON DELETE CASCADE
+  );
+`);
+}
 
 // Mock Data seeding
 const seedCount = db.prepare('SELECT COUNT(*) as count FROM cars').get() as {count: number};
